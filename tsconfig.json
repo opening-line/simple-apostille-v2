@@ -22,22 +22,22 @@
       "*": [
         "node_modules/*",
         "src/types/*"
-      ]
+      ],
+      "@src/*": ["src/*"]
     },
     "typeRoots": [
       "node_modules/@types"
     ],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
+    "skipLibCheck": true
   },
   "files": [
     "index.ts"
   ],
   "exclude": [
     "node_modules",
-    "dist",
-    "**/tests/*"
+    "dist"
   ],
   "include": [
     "src/**/*.ts",
