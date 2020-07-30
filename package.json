@@ -1,0 +1,47 @@
+{
+  "name": "simple-apostille-v2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "commit": "npx git-cz",
+    "commit-all": "git add . && npx git-cz"
+  },
+  "author": "Kazuya Okada <daoka@opening-line.co.jp> (https://www.opening-line.co.jp)",
+  "license": "apache-v2",
+  "dependencies": {
+    "rxjs": "^6.5.3",
+    "symbol-sdk": "^0.20.6"
+  },
+  "devDependencies": {
+    "@types/jest": "^25.2.3",
+    "@types/node": "^14.0.27",
+    "@typescript-eslint/eslint-plugin": "^3.7.1",
+    "@typescript-eslint/parser": "^3.7.1",
+    "eslint": "^7.5.0",
+    "eslint-config-airbnb-typescript": "^9.0.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jest": "^23.19.0",
+    "jest": "^25.5.4",
+    "prettier": "^2.0.5",
+    "ts-jest": "^25.5.1",
+    "typescript": "^3.8.3"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.json"
+      }
+    }
+  }
+}
