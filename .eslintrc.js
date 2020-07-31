@@ -19,6 +19,8 @@ module.exports = {
     'prettier/@typescript-eslint',
   ],
   rules: {
-    'import/prefer-default-export': 'off'
+    'import/prefer-default-export': 'off',
+    'class-methods-use-this': 'off',
+    '@typescript-eslint/naming-convention': 'off',
   }
 }

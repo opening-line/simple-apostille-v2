@@ -12,6 +12,7 @@
   "author": "Kazuya Okada <daoka@opening-line.co.jp> (https://www.opening-line.co.jp)",
   "license": "apache-v2",
   "dependencies": {
+    "js-sha3": "^0.8.0",
     "rxjs": "^6.5.3",
     "symbol-sdk": "^0.20.6"
   },
