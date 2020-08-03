@@ -13,8 +13,17 @@ export abstract class HashFunction {
     return account.signData(hashedData);
   }
 
+  public signedHashingFromHashedData(hashedData: string, account: Account) {
+    return account.signData(hashedData);
+  }
+
   public createApostilleTransactionMessage(data: string, account: Account) {
     const signedHash = this.signedHashing(data, account);
+    return `${this.checkSum}${signedHash}`;
+  }
+
+  public createApostilleTransactionMessageFromHashedData(hashedData: string, account: Account) {
+    const signedHash = this.signedHashingFromHashedData(hashedData, account);
     return `${this.checkSum}${signedHash}`;
   }
 }

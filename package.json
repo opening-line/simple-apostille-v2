@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --coverage",
+    "test": "jest --verbose --coverage",
     "lint": "eslint src",
     "commit": "npx git-cz",
     "commit-all": "git add . && npx git-cz"
