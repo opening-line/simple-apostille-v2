@@ -1,4 +1,4 @@
-import { PublicAccount, Account } from 'symbol-sdk';
+import { PublicAccount, Account, MultisigHttp, MultisigAccountInfo } from 'symbol-sdk';
 import { createHash } from 'crypto';
 
 const fixPrivateKey = (privateKey) => {
@@ -17,13 +17,36 @@ export class ApostilleAccount {
    */
   public readonly publicAccount: PublicAccount;
 
-  private constructor(account: Account | PublicAccount) {
+  /**
+   * Apostille Account's multisig account info
+   */
+  public multisigInfo?: MultisigAccountInfo;
+
+  /**
+   * Symbol API Endpoint
+   */
+  public apiEndpoint?: string;
+
+  private constructor(account: Account | PublicAccount, apiEndpoint?: string) {
     if (account instanceof Account) {
       this.account = account;
       this.publicAccount = account.publicAccount;
     } else {
       this.publicAccount = account;
     }
+
+    if (apiEndpoint) {
+      this.apiEndpoint = apiEndpoint;
+    }
+  }
+
+  public async getMultisigAccountInfo() {
+    if (this.apiEndpoint) {
+      const multisigHttp = new MultisigHttp(this.apiEndpoint);
+      const multisigInfo = await multisigHttp.getMultisigAccountInfo(this.publicAccount.address).toPromise();
+      this.multisigInfo = multisigInfo;
+    }
+    throw Error('API Endpoint is not undefined');
   }
 
   /**
@@ -31,7 +54,7 @@ export class ApostilleAccount {
    * @param seed seed (ex: filename)
    * @param ownerAccount owner's symbol account
    */
-  public static create(seed: string, ownerAccount: Account) {
+  public static create(seed: string, ownerAccount: Account, apiEndpoint?: string) {
     const {networkType} = ownerAccount.address;
     const hashFunc = createHash('sha256');
     hashFunc.update(seed);
@@ -39,14 +62,14 @@ export class ApostilleAccount {
     const signedSeed = ownerAccount.signData(hashedSeed);
     const privateKey = fixPrivateKey(signedSeed);
     const apostilleAccount = Account.createFromPrivateKey(privateKey, networkType);
-    return new ApostilleAccount(apostilleAccount);
+    return new ApostilleAccount(apostilleAccount, apiEndpoint);
   }
 
   /**
    * Create apostille account from exist account
    * @param existAccount exist apostille account or public account
    */
-  public static createFromExistAccount(existAccount: Account | PublicAccount) {
-    return new ApostilleAccount(existAccount);
+  public static createFromExistAccount(existAccount: Account | PublicAccount, apiEndpoint?: string) {
+    return new ApostilleAccount(existAccount, apiEndpoint);
   }
 }

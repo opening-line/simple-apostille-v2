@@ -4,6 +4,15 @@ import { MetadataKeyHelper } from "../utils/MetadataKeyHelper";
 import { ApostilleAccount } from "./ApostilleAccount";
 import { IApostilleOptions } from "./ApostilleOptions";
 
+
+export enum AnnounceType {
+  CompleteWithApostilleAccountSign,
+  CompleteWithoutApostilleAccountSing,
+  BondedWithApostilleAccountSing,
+  BondedWithoutApostilleAccountSing,
+  CannotAnnounce,
+  Unknown,
+}
 export class ApostilleTransaction {
   public coreTransaction?: TransferTransaction;
 
@@ -29,10 +38,13 @@ export class ApostilleTransaction {
     ownerAccount: Account,
     networkType: NetworkType,
     options?: IApostilleOptions,
+    apiEndpoint?: string,
     ) {
       const hashFunc = HashFunctionCreator.create(hashingType);
       const apostilleMessage = hashFunc.createApostilleTransactionMessage(data, ownerAccount);
-      const apostilleAccount = ApostilleAccount.create(seed, ownerAccount);
+      const apostilleAccount = ApostilleAccount.create(seed,
+        ownerAccount,
+        apiEndpoint);
       const apostilleTransaction = new ApostilleTransaction(
         ownerAccount,
         apostilleAccount,
@@ -59,10 +71,13 @@ export class ApostilleTransaction {
     ownerAccount: Account,
     networkType: NetworkType,
     options?: IApostilleOptions,
+    apiEndpoint?: string,
     ) {
       const hashFunc = HashFunctionCreator.create(hashingType);
       const apostilleMessage = hashFunc.createApostilleTransactionMessageFromHashedData(hashedData, ownerAccount);
-      const apostilleAccount = ApostilleAccount.create(seed, ownerAccount);
+      const apostilleAccount = ApostilleAccount.create(seed,
+        ownerAccount,
+        apiEndpoint);
       const apostilleTransaction = new ApostilleTransaction(
         ownerAccount,
         apostilleAccount,
@@ -154,7 +169,30 @@ export class ApostilleTransaction {
     this.innerTransactions = innerTxs;
   }
 
-  public shouldAnnounceByBondedTransaction() {
-    return true;
+  public async announceType() {
+    if (this.apostilleAccount.multisigInfo) {
+      const {multisigInfo} = this.apostilleAccount;
+      if (multisigInfo.minApproval >= 2) {
+        return AnnounceType.BondedWithoutApostilleAccountSing;
+      }
+      if (multisigInfo.minApproval === 1 &&
+          multisigInfo.hasCosigner(this.ownerAccount.address)) {
+        return AnnounceType.CompleteWithoutApostilleAccountSing;
+      }
+      if (multisigInfo.minApproval === 1 &&
+          !multisigInfo.hasCosigner(this.ownerAccount.address)) {
+        return AnnounceType.CannotAnnounce;
+      }
+      if (this.options && this.options.assignOwners) {
+        if (this.options.assignOwners.length > 1) {
+          return AnnounceType.BondedWithApostilleAccountSing;
+        }
+        if (this.options.assignOwners.includes(this.ownerAccount.address)) {
+          return AnnounceType.CompleteWithApostilleAccountSign;
+        }
+        return AnnounceType.BondedWithApostilleAccountSing;
+      }
+    }
+    return AnnounceType.Unknown;
   }
 }
