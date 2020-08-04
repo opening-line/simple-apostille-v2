@@ -1,4 +1,4 @@
-import { Account, MultisigAccountModificationTransaction, AccountMetadataTransaction, TransferTransaction, Deadline, PlainMessage, NetworkType, InnerTransaction } from "symbol-sdk";
+import { Account, MultisigAccountModificationTransaction, AccountMetadataTransaction, TransferTransaction, Deadline, PlainMessage, NetworkType, InnerTransaction, PublicAccount } from "symbol-sdk";
 import { HashingType, HashFunctionCreator } from "../utils/hash";
 import { MetadataKeyHelper } from "../utils/MetadataKeyHelper";
 import { ApostilleAccount } from "./ApostilleAccount";
@@ -86,6 +86,50 @@ export class ApostilleTransaction {
         options,
       );
       return apostilleTransaction;
+  }
+
+  public static updateFromData(
+    data: string,
+    hashingType: HashingType.Type,
+    ownerAccount: Account,
+    existApostilleAccount: Account | PublicAccount,
+    networkType: NetworkType,
+    apiEndpoint: string,
+  ) {
+    const hashFunc = HashFunctionCreator.create(hashingType);
+    const apostilleMessage = hashFunc.createApostilleTransactionMessage(
+      data, ownerAccount
+    );
+    const apostilleAccount = ApostilleAccount.createFromExistAccount(existApostilleAccount, apiEndpoint);
+    const apostilleTransaction = new ApostilleTransaction(
+      ownerAccount,
+      apostilleAccount,
+      apostilleMessage,
+      networkType
+    );
+    return apostilleTransaction;
+  }
+
+  public static updateFromHashedData(
+    hashedData: string,
+    hashingType: HashingType.Type,
+    ownerAccount: Account,
+    existApostilleAccount: Account | PublicAccount,
+    networkType: NetworkType,
+    apiEndpoint: string,
+  ) {
+    const hashFunc = HashFunctionCreator.create(hashingType);
+    const apostilleMessage = hashFunc.createApostilleTransactionMessageFromHashedData(
+      hashedData, ownerAccount
+    );
+    const apostilleAccount = ApostilleAccount.createFromExistAccount(existApostilleAccount, apiEndpoint);
+    const apostilleTransaction = new ApostilleTransaction(
+      ownerAccount,
+      apostilleAccount,
+      apostilleMessage,
+      networkType
+    );
+    return apostilleTransaction;
   }
 
   private constructor(
