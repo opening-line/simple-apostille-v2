@@ -37,8 +37,8 @@ export class ApostilleTransaction {
     seed: string,
     ownerAccount: Account,
     networkType: NetworkType,
-    options?: IApostilleOptions,
     apiEndpoint?: string,
+    options?: IApostilleOptions,
     ) {
       const hashFunc = HashFunctionCreator.create(hashingType);
       const apostilleMessage = hashFunc.createApostilleTransactionMessage(data, ownerAccount);
@@ -70,8 +70,8 @@ export class ApostilleTransaction {
     seed: string,
     ownerAccount: Account,
     networkType: NetworkType,
-    options?: IApostilleOptions,
     apiEndpoint?: string,
+    options?: IApostilleOptions,
     ) {
       const hashFunc = HashFunctionCreator.create(hashingType);
       const apostilleMessage = hashFunc.createApostilleTransactionMessageFromHashedData(hashedData, ownerAccount);
@@ -236,6 +236,9 @@ export class ApostilleTransaction {
       }
       return AnnounceType.BondedWithApostilleAccountSing;
     }
-    return AnnounceType.CompleteWithApostilleAccountSign;
+    if (this.metaDataTransactions) {
+      return AnnounceType.CompleteWithApostilleAccountSign;
+    }
+    return AnnounceType.CompleteWithoutApostilleAccountSing;
   }
 }

@@ -58,6 +58,7 @@ describe('Should create apostille transaction', () => {
       seed,
       ownerAccount,
       networkType,
+      apiEndpoint,
       options
     );
 
@@ -85,6 +86,7 @@ describe('Should create apostille transaction', () => {
       seed,
       ownerAccount,
       networkType,
+      apiEndpoint,
       options
     );
 
@@ -112,6 +114,7 @@ describe('Should create apostille transaction', () => {
       seed,
       ownerAccount,
       networkType,
+      apiEndpoint,
       options
     );
 
