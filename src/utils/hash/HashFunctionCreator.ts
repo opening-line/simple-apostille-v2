@@ -20,4 +20,9 @@ export class HashFunctionCreator {
       default: throw Error('hashing type unmatched');
     }
   }
+
+  static createWithTypeStr(typeStr: string) {
+    const hashType = HashingType.hashTypeStrToType(typeStr);
+    return HashFunctionCreator.create(hashType);
+  }
 }
