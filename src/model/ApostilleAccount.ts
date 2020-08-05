@@ -42,11 +42,23 @@ export class ApostilleAccount {
 
   public async getMultisigAccountInfo() {
     if (this.apiEndpoint) {
-      const multisigHttp = new MultisigHttp(this.apiEndpoint);
-      const multisigInfo = await multisigHttp.getMultisigAccountInfo(this.publicAccount.address).toPromise();
-      this.multisigInfo = multisigInfo;
+      try {
+        const multisigHttp = new MultisigHttp(this.apiEndpoint);
+        const multisigInfo = await multisigHttp.getMultisigAccountInfo(this.publicAccount.address).toPromise();
+        this.multisigInfo = multisigInfo;
+      } catch(err) {
+        if (err.message) {
+          const errMessage = JSON.parse(err.message);
+          if (errMessage.statusCode !== 404) {
+            throw Error('Multisig info error');
+          }
+        } else {
+          throw Error('Multisig info api connection error');
+        }
+      }
+    } else {
+      throw Error('API Endpoint is not undefined');
     }
-    throw Error('API Endpoint is not undefined');
   }
 
   /**

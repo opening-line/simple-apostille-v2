@@ -214,6 +214,7 @@ export class ApostilleTransaction {
   }
 
   public async announceType() {
+    await this.apostilleAccount.getMultisigAccountInfo();
     if (this.apostilleAccount.multisigInfo) {
       const {multisigInfo} = this.apostilleAccount;
       if (multisigInfo.minApproval >= 2) {
@@ -227,16 +228,14 @@ export class ApostilleTransaction {
           !multisigInfo.hasCosigner(this.ownerAccount.address)) {
         return AnnounceType.CannotAnnounce;
       }
-      if (this.options && this.options.assignOwners) {
-        if (this.options.assignOwners.length > 1) {
-          return AnnounceType.BondedWithApostilleAccountSing;
-        }
-        if (this.options.assignOwners.includes(this.ownerAccount.address)) {
-          return AnnounceType.CompleteWithApostilleAccountSign;
-        }
-        return AnnounceType.BondedWithApostilleAccountSing;
-      }
     }
-    return AnnounceType.Unknown;
+    if (this.options && this.options.assignOwners) {
+      if (this.options.assignOwners.length === 1 &&
+        this.options.assignOwners.includes(this.ownerAccount.address)) {
+        return AnnounceType.CompleteWithApostilleAccountSign;
+      }
+      return AnnounceType.BondedWithApostilleAccountSing;
+    }
+    return AnnounceType.CompleteWithApostilleAccountSign;
   }
 }
