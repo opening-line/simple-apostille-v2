@@ -1,8 +1,8 @@
 {
   "name": "simple-apostille-v2",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "test": "jest --verbose --coverage",
     "lint": "eslint src",
