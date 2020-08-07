@@ -1,0 +1,8 @@
+.prettierrc
+tsconfig.json
+.eslintrc.js
+test/
+src/
+examples/
+index.ts
+coverage/
