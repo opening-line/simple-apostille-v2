@@ -1,9 +1,12 @@
 {
   "name": "simple-apostille-v2",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "",
-  "main": "index.ts",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
+    "prepack": "rm -rf dist/ && tsc",
+    "build": "rm -rf dist/ && tsc",
     "test": "jest --verbose --coverage",
     "lint": "eslint src",
     "commit": "npx git-cz",
