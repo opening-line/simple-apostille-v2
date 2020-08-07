@@ -11,7 +11,9 @@ const ownerAccount = Account.createFromPrivateKey('F1E7660DB9EF5E73203881304F31B
 const owner2 = Address.createFromRawAddress('TAXM7E-K6UF7I-YPSIAH-7BB6KX-SKE2Q5-KGZUQY-ERQ');
 const owner3 = Address.createFromRawAddress('TATJFR-D5ENAN-2QD7J4-WKATCB-4T2ZRA-6POK42-SCI')
 const message = 'fe4e5459831CF9E29E3BFDE4CBA65C21EDEA5319A8E7CBE49F332AAF563D8C908EA1CC273DE337962081B0301F789CAFF9B6003C5BD94DF5F20B63FDF1399640514FA2CC00';
+const feeMultiplier = 100;
 const apiEndpoint = 'https://sym-test963.opening-line.jp:3001';
+const generationHashSeed = '1DFB2FAA9E7F054168B0C5FCB84F4DEB62CC2B4D317D861F3168D161F54EA78B';
 
 describe('Should create apostille transaction', () => {
   it('Should create apostille transaction from data', () => {
@@ -20,7 +22,10 @@ describe('Should create apostille transaction', () => {
       HashingType.Type.sha256,
       seed,
       ownerAccount,
-      networkType
+      networkType,
+      generationHashSeed,
+      feeMultiplier,
+      apiEndpoint,
     );
 
     expect(transaction.coreTransaction).toBeDefined();
@@ -36,7 +41,10 @@ describe('Should create apostille transaction', () => {
       HashingType.Type.sha256,
       seed,
       ownerAccount,
-      networkType
+      networkType,
+      generationHashSeed,
+      feeMultiplier,
+      apiEndpoint,
     );
     
     expect(transaction.coreTransaction).toBeDefined();
@@ -58,6 +66,8 @@ describe('Should create apostille transaction', () => {
       seed,
       ownerAccount,
       networkType,
+      generationHashSeed,
+      feeMultiplier,
       apiEndpoint,
       options
     );
@@ -86,6 +96,8 @@ describe('Should create apostille transaction', () => {
       seed,
       ownerAccount,
       networkType,
+      generationHashSeed,
+      feeMultiplier,
       apiEndpoint,
       options
     );
@@ -114,6 +126,8 @@ describe('Should create apostille transaction', () => {
       seed,
       ownerAccount,
       networkType,
+      generationHashSeed,
+      feeMultiplier,
       apiEndpoint,
       options
     );
@@ -140,6 +154,8 @@ describe('Should create update transaction', () => {
       ownerAccount,
       apostilleAccount,
       networkType,
+      generationHashSeed,
+      feeMultiplier,
       apiEndpoint,
     );
     expect(transaction.coreTransaction).toBeDefined();
@@ -156,6 +172,8 @@ describe('Should create update transaction', () => {
       ownerAccount,
       apostilleAccount,
       networkType,
+      generationHashSeed,
+      feeMultiplier,
       apiEndpoint,
     );
     expect(transaction.coreTransaction).toBeDefined();
