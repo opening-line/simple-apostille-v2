@@ -28,7 +28,7 @@ export class ApostilleTransaction {
    * @param data 
    * @param hashingType 
    * @param seed 
-   * @param ownerAccount 
+   * @param singerAccount 
    * @param networkType 
    * @param generationHashSeed 
    * @param feeMultiplier 
@@ -39,7 +39,7 @@ export class ApostilleTransaction {
     data: string,
     hashingType: HashingType.Type,
     seed: string,
-    ownerAccount: Account,
+    singerAccount: Account,
     networkType: NetworkType,
     generationHashSeed: string,
     feeMultiplier: number,
@@ -47,12 +47,12 @@ export class ApostilleTransaction {
     options?: IApostilleOptions,
     ) {
       const hashFunc = HashFunctionCreator.create(hashingType);
-      const apostilleMessage = hashFunc.createApostilleTransactionMessage(data, ownerAccount);
+      const apostilleMessage = hashFunc.createApostilleTransactionMessage(data, singerAccount);
       const apostilleAccount = ApostilleAccount.create(seed,
-        ownerAccount,
+        singerAccount,
         apiEndpoint);
       const apostilleTransaction = new ApostilleTransaction(
-        ownerAccount,
+        singerAccount,
         apostilleAccount,
         apostilleMessage,
         networkType,
@@ -68,7 +68,7 @@ export class ApostilleTransaction {
    * @param hashedData 
    * @param hashingType 
    * @param seed 
-   * @param ownerAccount 
+   * @param signerAccount 
    * @param networkType 
    * @param generationHashSeed 
    * @param feeMultiplier 
@@ -79,7 +79,7 @@ export class ApostilleTransaction {
     hashedData: string,
     hashingType: HashingType.Type,
     seed: string,
-    ownerAccount: Account,
+    signerAccount: Account,
     networkType: NetworkType,
     generationHashSeed: string,
     feeMultiplier: number,
@@ -87,12 +87,12 @@ export class ApostilleTransaction {
     options?: IApostilleOptions,
     ) {
       const hashFunc = HashFunctionCreator.create(hashingType);
-      const apostilleMessage = hashFunc.createApostilleTransactionMessageFromHashedData(hashedData, ownerAccount);
+      const apostilleMessage = hashFunc.createApostilleTransactionMessageFromHashedData(hashedData, signerAccount);
       const apostilleAccount = ApostilleAccount.create(seed,
-        ownerAccount,
+        signerAccount,
         apiEndpoint);
       const apostilleTransaction = new ApostilleTransaction(
-        ownerAccount,
+        signerAccount,
         apostilleAccount,
         apostilleMessage,
         networkType,
@@ -107,7 +107,7 @@ export class ApostilleTransaction {
    * 
    * @param data 
    * @param hashingType 
-   * @param ownerAccount 
+   * @param signerAccount 
    * @param existApostilleAccount 
    * @param networkType 
    * @param generationHashSeed 
@@ -117,7 +117,7 @@ export class ApostilleTransaction {
   public static updateFromData(
     data: string,
     hashingType: HashingType.Type,
-    ownerAccount: Account,
+    signerAccount: Account,
     existApostilleAccount: Account | PublicAccount,
     networkType: NetworkType,
     generationHashSeed: string,
@@ -126,11 +126,11 @@ export class ApostilleTransaction {
   ) {
     const hashFunc = HashFunctionCreator.create(hashingType);
     const apostilleMessage = hashFunc.createApostilleTransactionMessage(
-      data, ownerAccount
+      data, signerAccount
     );
     const apostilleAccount = ApostilleAccount.createFromExistAccount(existApostilleAccount, apiEndpoint);
     const apostilleTransaction = new ApostilleTransaction(
-      ownerAccount,
+      signerAccount,
       apostilleAccount,
       apostilleMessage,
       networkType,
@@ -144,7 +144,7 @@ export class ApostilleTransaction {
    * 
    * @param hashedData 
    * @param hashingType 
-   * @param ownerAccount 
+   * @param signerAccount 
    * @param existApostilleAccount 
    * @param networkType 
    * @param generationHashSeed 
@@ -154,7 +154,7 @@ export class ApostilleTransaction {
   public static updateFromHashedData(
     hashedData: string,
     hashingType: HashingType.Type,
-    ownerAccount: Account,
+    signerAccount: Account,
     existApostilleAccount: Account | PublicAccount,
     networkType: NetworkType,
     generationHashSeed: string,
@@ -163,11 +163,11 @@ export class ApostilleTransaction {
   ) {
     const hashFunc = HashFunctionCreator.create(hashingType);
     const apostilleMessage = hashFunc.createApostilleTransactionMessageFromHashedData(
-      hashedData, ownerAccount
+      hashedData, signerAccount
     );
     const apostilleAccount = ApostilleAccount.createFromExistAccount(existApostilleAccount, apiEndpoint);
     const apostilleTransaction = new ApostilleTransaction(
-      ownerAccount,
+      signerAccount,
       apostilleAccount,
       apostilleMessage,
       networkType,
@@ -178,7 +178,7 @@ export class ApostilleTransaction {
   }
 
   private constructor(
-    public readonly ownerAccount: Account,
+    public readonly signerAccount: Account,
     public readonly apostilleAccount: ApostilleAccount,
     private readonly apostilleMessage: string,
     private readonly networkType: NetworkType,
@@ -268,7 +268,7 @@ export class ApostilleTransaction {
   private convertInnerTransactions() {
     const innerTxs: InnerTransaction[] = []
     if (this.coreTransaction) {
-      const innerTx = this.coreTransaction.toAggregate(this.ownerAccount.publicAccount);
+      const innerTx = this.coreTransaction.toAggregate(this.signerAccount.publicAccount);
       innerTxs.push(innerTx);
     }
     if (this.assignOwnerShipTransaction) {
@@ -335,7 +335,7 @@ export class ApostilleTransaction {
 
   private signTransactionWithApostilleAccount(aggregateTx: AggregateTransaction) {
     if (this.apostilleAccount.account) {
-      const signedTx = this.ownerAccount.signTransactionWithCosignatories(
+      const signedTx = this.signerAccount.signTransactionWithCosignatories(
         aggregateTx,
         [this.apostilleAccount.account],
         this.generationHashSeed,
@@ -346,7 +346,7 @@ export class ApostilleTransaction {
   }
 
   private signTransactionWithoutApostilleAccount(aggregateTx: AggregateTransaction) {
-    const signedTx = this.ownerAccount.sign(
+    const signedTx = this.signerAccount.sign(
       aggregateTx,
       this.generationHashSeed,
     );
@@ -378,17 +378,17 @@ export class ApostilleTransaction {
         this.announceType = AnnounceType.BondedWithoutApostilleAccountSing;
       }
       if (multisigInfo.minApproval === 1 &&
-          multisigInfo.hasCosigner(this.ownerAccount.address)) {
+          multisigInfo.hasCosigner(this.signerAccount.address)) {
         this.announceType = AnnounceType.CompleteWithoutApostilleAccountSing;
       }
       if (multisigInfo.minApproval === 1 &&
-          !multisigInfo.hasCosigner(this.ownerAccount.address)) {
+          !multisigInfo.hasCosigner(this.signerAccount.address)) {
         this.announceType = AnnounceType.CannotAnnounce;
       }
     }
     if (this.options && this.options.assignOwners) {
       if (this.options.assignOwners.length === 1 &&
-        this.options.assignOwners.includes(this.ownerAccount.address)) {
+        this.options.assignOwners.includes(this.signerAccount.address)) {
         this.announceType = AnnounceType.CompleteWithApostilleAccountSign;
       }
       this.announceType = AnnounceType.BondedWithApostilleAccountSing;
