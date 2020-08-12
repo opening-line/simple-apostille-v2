@@ -1,5 +1,4 @@
-import { createHash } from "crypto";
-import { HashFunction } from "./HashFunction";
+import { HashFunction, DataView } from "./HashFunction";
 import { HashingType } from "./HashingType";
 
 export class MD5 extends HashFunction {
@@ -7,9 +6,11 @@ export class MD5 extends HashFunction {
     super(HashingType.Type.md5);
   }
 
-  public hashing(data: string) {
-    const hashFunc = createHash('md5');
-    hashFunc.update(data);
-    return hashFunc.digest('hex');
+  public hashing(data: DataView) {
+    // eslint-disable-next-line global-require
+    const md5 = require('js-md5');
+    const hash = md5.create();
+    hash.update(data);
+    return hash.hex();
   }
 }

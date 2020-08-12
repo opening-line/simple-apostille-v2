@@ -1,5 +1,4 @@
-import { createHash } from "crypto";
-import { HashFunction } from "./HashFunction";
+import { HashFunction, DataView } from "./HashFunction";
 import { HashingType } from "./HashingType";
 
 
@@ -8,9 +7,11 @@ export class SHA1 extends HashFunction {
     super(HashingType.Type.sha1);
   }
 
-  public hashing(data: string) {
-    const hashFunc = createHash('sha1');
-    hashFunc.update(data);
-    return hashFunc.digest('hex');
+  public hashing(data: DataView) {
+    // eslint-disable-next-line global-require
+    const sha1 = require('js-sha1');
+    const hash = sha1.create();
+    hash.update(data);
+    return hash.hex();
   }
 }

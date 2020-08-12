@@ -1,14 +1,15 @@
 import { Account } from 'symbol-sdk';
 import { HashingType } from './HashingType';
 
+export type DataView = string | ArrayBuffer
 export abstract class HashFunction {
   constructor(public readonly typeHex: HashingType.Type) { }
 
-  public abstract hashing(data: string);
+  public abstract hashing(data: DataView);
 
   public checkSum = `fe4e5459${this.typeHex}`;
 
-  public signedHashing(data: string, account: Account) {
+  public signedHashing(data: DataView, account: Account) {
     const hashedData = this.hashing(data);
     return account.signData(hashedData);
   }
@@ -17,7 +18,7 @@ export abstract class HashFunction {
     return account.signData(hashedData);
   }
 
-  public createApostilleTransactionMessage(data: string, account: Account) {
+  public createApostilleTransactionMessage(data: DataView, account: Account) {
     const signedHash = this.signedHashing(data, account);
     return `${this.checkSum}${signedHash}`;
   }

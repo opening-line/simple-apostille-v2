@@ -1,5 +1,5 @@
 import { keccak256 } from 'js-sha3';
-import { HashFunction } from "./HashFunction";
+import { HashFunction, DataView } from "./HashFunction";
 import { HashingType } from "./HashingType";
 
 export class KECCAK256 extends HashFunction {
@@ -7,7 +7,7 @@ export class KECCAK256 extends HashFunction {
     super(HashingType.Type.keccak256);
   }
 
-  public hashing(data: string) {
+  public hashing(data: DataView) {
     return keccak256.update(data).hex();
   }
 }
