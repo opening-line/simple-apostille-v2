@@ -1,5 +1,5 @@
 import { Account, MultisigAccountModificationTransaction, AccountMetadataTransaction, TransferTransaction, Deadline, PlainMessage, NetworkType, InnerTransaction, PublicAccount, AggregateTransaction } from "symbol-sdk";
-import { HashingType, HashFunctionCreator } from "../utils/hash";
+import { HashingType, HashFunctionCreator, DataView } from "../utils/hash";
 import { MetadataKeyHelper } from "../utils/MetadataKeyHelper";
 import { ApostilleAccount } from "./ApostilleAccount";
 import { IApostilleOptions } from "./ApostilleOptions";
@@ -14,6 +14,7 @@ export enum AnnounceType {
   CannotAnnounce,
   Unknown,
 }
+
 export class ApostilleTransaction {
   public coreTransaction?: TransferTransaction;
 
@@ -36,7 +37,7 @@ export class ApostilleTransaction {
    * @param options 
    */
   public static createFromData(
-    data: string,
+    data: DataView,
     hashingType: HashingType.Type,
     seed: string,
     singerAccount: Account,
@@ -115,7 +116,7 @@ export class ApostilleTransaction {
    * @param apiEndpoint 
    */
   public static updateFromData(
-    data: string,
+    data: DataView,
     hashingType: HashingType.Type,
     signerAccount: Account,
     existApostilleAccount: Account | PublicAccount,
