@@ -1,13 +1,13 @@
 import { RepositoryFactoryHttp, TransactionGroup, AggregateTransaction, TransferTransaction, UInt64, BlockInfo, Address } from "symbol-sdk";
 import { IAuditResult } from "@src/model";
 import { IApostilleTxMessage } from "../model/ApostilleTxMessage";
-import { HashFunctionCreator } from "../utils/hash";
+import { HashFunctionCreator, DataView } from "../utils/hash";
 
 export class AuditService {
   private readonly repositoryFactory: RepositoryFactoryHttp;
 
   public static async audit(
-    data: string,
+    data: DataView,
     txHash: string,
     apiEndpoint: string,
   ) {
@@ -17,7 +17,7 @@ export class AuditService {
   }
 
   constructor(
-    private readonly data: string,
+    private readonly data: DataView,
     private readonly txHash: string,
     apiEndpoint: string,
   ) {

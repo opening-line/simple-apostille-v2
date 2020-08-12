@@ -1,7 +1,7 @@
 import { Account } from 'symbol-sdk';
 import { HashingType } from './HashingType';
 
-export type DataView = string | ArrayBuffer | Uint8Array
+export type DataView = string | ArrayBuffer
 export abstract class HashFunction {
   constructor(public readonly typeHex: HashingType.Type) { }
 
