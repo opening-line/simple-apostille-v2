@@ -6,11 +6,11 @@ import { HashingType } from '../src/utils/hash';
 const data = 'Hello World!';
 const seed = `hello_${new Date().toLocaleString()}.txt`;
 
-const ownerKey = '59087E5F5B04C1F23DB7C791895EBC1DD8AAA0BB56F47213BD18E333C64BB3C8';
+const ownerKey = '3FDF8213014388A174A4B5F8DF4C7A502C8D8C1D8872188D6E17A25A53FA438A';
 const networkType = NetworkType.TEST_NET;
 const account = Account.createFromPrivateKey(ownerKey, networkType);
 
-const apiEndpoint = 'https://sym-test963.opening-line.jp:3001';
+const apiEndpoint = 'https://sym-test964.opening-line.jp:3001';
 const generationHash = '1DFB2FAA9E7F054168B0C5FCB84F4DEB62CC2B4D317D861F3168D161F54EA78B';
 const feeMultiplier = 100;
 const repositoryFactory = new RepositoryFactoryHttp(
@@ -31,6 +31,7 @@ const apostilleTransaction = ApostilleTransaction.createFromData(
 
 apostilleTransaction.singedTransactionAndAnnounceType().then((info) => {
   const signedTx = info.signedTransaction;
+  console.log(signedTx.hash);
   const transactionService = new TransactionService(
     repositoryFactory.createTransactionRepository(),
     repositoryFactory.createReceiptRepository(),
