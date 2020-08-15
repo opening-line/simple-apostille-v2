@@ -7,13 +7,13 @@ const networkType = NetworkType.TEST_NET;
 
 const data = 'Hello World!!';
 
-const apostilleAccountKey = '3E2E5B3E437066FE9EAEC3B421AD5AC96C657ED1560DC408D49B87A32248CD0F';
+const apostilleAccountKey = 'CC02E6CF86EBEA0F83DBFD45413F7529A5459514148718BD0EFCA6263E6CF10A';
 const apostilleAccount = Account.createFromPrivateKey(apostilleAccountKey, networkType);
 
-const ownerKey = '59087E5F5B04C1F23DB7C791895EBC1DD8AAA0BB56F47213BD18E333C64BB3C8';
+const ownerKey = '3FDF8213014388A174A4B5F8DF4C7A502C8D8C1D8872188D6E17A25A53FA438A';
 const ownerAccount = Account.createFromPrivateKey(ownerKey, networkType);
 
-const apiEndpoint = 'https://sym-test963.opening-line.jp:3001';
+const apiEndpoint = 'https://sym-test964.opening-line.jp:3001';
 const generationHash = '1DFB2FAA9E7F054168B0C5FCB84F4DEB62CC2B4D317D861F3168D161F54EA78B';
 const repositoryFactory = new RepositoryFactoryHttp(
   apiEndpoint,
