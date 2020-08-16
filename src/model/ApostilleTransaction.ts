@@ -377,25 +377,31 @@ export class ApostilleTransaction {
       const {multisigInfo} = this.apostilleAccount;
       if (multisigInfo.minApproval >= 2) {
         this.announceType = AnnounceType.BondedWithoutApostilleAccountSing;
+        return;
       }
       if (multisigInfo.minApproval === 1 &&
           multisigInfo.hasCosigner(this.signerAccount.address)) {
         this.announceType = AnnounceType.CompleteWithoutApostilleAccountSing;
+        return;
       }
       if (multisigInfo.minApproval === 1 &&
           !multisigInfo.hasCosigner(this.signerAccount.address)) {
         this.announceType = AnnounceType.CannotAnnounce;
+        return;
       }
     }
     if (this.options && this.options.assignOwners) {
       if (this.options.assignOwners.length === 1 &&
         this.options.assignOwners.includes(this.signerAccount.address)) {
         this.announceType = AnnounceType.CompleteWithApostilleAccountSign;
+        return;
       }
       this.announceType = AnnounceType.BondedWithApostilleAccountSing;
+      return;
     }
     if (this.metaDataTransactions) {
       this.announceType = AnnounceType.CompleteWithApostilleAccountSign;
+      return;
     }
     this.announceType = AnnounceType.CompleteWithoutApostilleAccountSing;
   }
