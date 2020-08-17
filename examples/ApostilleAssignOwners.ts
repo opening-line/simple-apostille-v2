@@ -15,7 +15,7 @@ const owner2 = Address.createFromRawAddress('TCGW6Z-J7NMDU-SRQFKK-XPSU4S-5AXCCS-
 
 const apiEndpoint = 'https://sym-test964.opening-line.jp:3001';
 const generationHash = '1DFB2FAA9E7F054168B0C5FCB84F4DEB62CC2B4D317D861F3168D161F54EA78B';
-const feeMultiplier = 200;
+const feeMultiplier = 400;
 const repositoryFactory = new RepositoryFactoryHttp(
   apiEndpoint,
   { generationHash, networkType }
