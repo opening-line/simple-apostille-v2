@@ -2,7 +2,7 @@ import { Address } from "symbol-sdk";
 
 export interface IAuditResult {
   isValid: boolean;
-  owner?: Address;
+  signer?: Address;
   apostilleAccount?: Address;
   timestamp?: Date;
 }
