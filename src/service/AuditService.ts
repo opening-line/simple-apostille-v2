@@ -1,6 +1,5 @@
 import { RepositoryFactoryHttp, TransactionGroup, AggregateTransaction, TransferTransaction, UInt64, BlockInfo, Address, MultisigAccountModificationTransaction, TransactionStatusHttp } from "symbol-sdk";
-import { IAuditResult, IPartialTxAuditResult, AuditType } from "@src/model";
-import { IApostilleTxMessage } from "../model/ApostilleTxMessage";
+import { IAuditResult, IPartialTxAuditResult, AuditType, IApostilleTxMessage } from "../model";
 import { HashFunctionCreator, DataView } from "../utils/hash";
 
 export class AuditService {
