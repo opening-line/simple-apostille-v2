@@ -1,5 +1,5 @@
-import { RepositoryFactoryHttp, TransactionGroup, AggregateTransaction, TransferTransaction, UInt64, BlockInfo, Address, MultisigAccountModificationTransaction } from "symbol-sdk";
-import { IAuditResult, IPartialTxAuditResult } from "@src/model";
+import { RepositoryFactoryHttp, TransactionGroup, AggregateTransaction, TransferTransaction, UInt64, BlockInfo, Address, MultisigAccountModificationTransaction, TransactionStatusHttp } from "symbol-sdk";
+import { IAuditResult, IPartialTxAuditResult, AuditType } from "@src/model";
 import { IApostilleTxMessage } from "../model/ApostilleTxMessage";
 import { HashFunctionCreator, DataView } from "../utils/hash";
 
@@ -11,8 +11,26 @@ export class AuditService {
     txHash: string,
     apiEndpoint: string,
   ) {
+    const transactionStatusHttp = new TransactionStatusHttp(apiEndpoint);
+    const status = await transactionStatusHttp.getTransactionStatus(txHash).toPromise();
+    if (status.group === 'confirmed') {
+      const result = await this.auditWithComplete(data, txHash, apiEndpoint);
+      return result;
+    }
+    if (status.group === 'partial') {
+      const result = await this.auditWithPartial(data, txHash, apiEndpoint);
+      return result;
+    }
+    throw Error('transaction not found');
+  }
+
+  public static async auditWithComplete(
+    data: DataView,
+    txHash: string,
+    apiEndpoint: string,
+  ) {
     const service = new AuditService(data, txHash, apiEndpoint);
-    const result = await service.audit();
+    const result = await service.auditWithConfirmed();
     return result;
   }
 
@@ -34,7 +52,7 @@ export class AuditService {
     this.repositoryFactory = new RepositoryFactoryHttp(apiEndpoint);
   }
 
-  private async audit() {
+  private async auditWithConfirmed() {
     const coreTx = await this.getTransaction();
     const singerPublicAccount = coreTx.signer!;
     const parsedMessage = this.parseMessage(coreTx.message.payload);
@@ -47,6 +65,7 @@ export class AuditService {
       const timestamp = await this.getTimestamp(coreTx.transactionInfo!.height);
       const result: IAuditResult = {
         isValid: true,
+        type: AuditType.Confirmed,
         signer,
         apostilleAccount,
         timestamp
@@ -73,6 +92,7 @@ export class AuditService {
       const cosignatories = this.getCosignatories(tx);
       const result: IPartialTxAuditResult = {
         isValid: true,
+        type: AuditType.Partial,
         signer,
         apostilleAccount,
         multisigAdditional: additions,
