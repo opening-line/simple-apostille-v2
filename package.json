@@ -1,6 +1,6 @@
 {
   "name": "simple-apostille-v2",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "Symbol blockchain notarization and timestamp service",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
