@@ -6,15 +6,15 @@ import { HashingType } from '../src/utils/hash';
 const data = 'Hello World!';
 const seed = `hello_${new Date().toLocaleString()}.txt`;
 
-const signerKey = '3FDF8213014388A174A4B5F8DF4C7A502C8D8C1D8872188D6E17A25A53FA438A';
+const signerKey = '3E04C96EBAE99124A1D388B05EBD007AA06CB917E09CA08F5859B3ADC49A148D';
 const networkType = NetworkType.TEST_NET;
 const account = Account.createFromPrivateKey(signerKey, networkType);
 
-const owner1 = Address.createFromRawAddress('TA6R2I-AGB6UC-52LIVT-KTRAPQ-WKCYJA-APLJIL-VMQ');
-const owner2 = Address.createFromRawAddress('TCGW6Z-J7NMDU-SRQFKK-XPSU4S-5AXCCS-GFMFU3-TMA');
+const owner1 = Address.createFromRawAddress('TAMBYNUGGDWZBFUZBJX4HWQCNJ2IBB5XVJVCMJQ');
+const owner2 = Address.createFromRawAddress('TBCCZ3HXPZLPQBEY6LZ2A3NE6WL5DHKZOMWMZFA');
 
-const apiEndpoint = 'https://sym-test964.opening-line.jp:3001';
-const generationHash = '1DFB2FAA9E7F054168B0C5FCB84F4DEB62CC2B4D317D861F3168D161F54EA78B';
+const apiEndpoint = 'https://sym-test.opening-line.jp:3001';
+const generationHash = '6C1B92391CCB41C96478471C2634C111D9E989DECD66130C0430B5B8D20117CD';
 const feeMultiplier = 400;
 const repositoryFactory = new RepositoryFactoryHttp(
   apiEndpoint,
