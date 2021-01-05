@@ -12,7 +12,9 @@ const account = Account.createFromPrivateKey(singerKey, networkType);
 
 const apiEndpoint = 'https://sym-test.opening-line.jp:3001';
 const generationHash = '6C1B92391CCB41C96478471C2634C111D9E989DECD66130C0430B5B8D20117CD';
-const feeMultiplier = 100;
+const feeMultiplier = 1000;
+const epochAdjustment = 1573430400;
+
 const repositoryFactory = new RepositoryFactoryHttp(
   apiEndpoint,
   { generationHash, networkType }
@@ -37,6 +39,7 @@ const apostilleTransaction = ApostilleTransaction.createFromData(
   generationHash,
   feeMultiplier,
   apiEndpoint,
+  epochAdjustment,
   option
 );
 
