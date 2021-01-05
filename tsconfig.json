@@ -30,7 +30,8 @@
     ],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noUnusedLocals": false,
   },
   "files": [
     "index.ts"

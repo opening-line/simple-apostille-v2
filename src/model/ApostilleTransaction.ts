@@ -44,7 +44,8 @@ export class ApostilleTransaction {
     networkType: NetworkType,
     generationHashSeed: string,
     feeMultiplier: number,
-    apiEndpoint?: string,
+    apiEndpoint: string,
+    epochAdjustment: number,
     options?: IApostilleOptions,
     ) {
       const hashFunc = HashFunctionCreator.create(hashingType);
@@ -59,6 +60,7 @@ export class ApostilleTransaction {
         networkType,
         generationHashSeed,
         feeMultiplier,
+        epochAdjustment,
         options,
       );
       return apostilleTransaction;
@@ -74,6 +76,7 @@ export class ApostilleTransaction {
    * @param generationHashSeed 
    * @param feeMultiplier 
    * @param apiEndpoint 
+   * @param epochAdjustment 
    * @param options 
    */
   public static createFromHashedData(
@@ -85,6 +88,7 @@ export class ApostilleTransaction {
     generationHashSeed: string,
     feeMultiplier: number,
     apiEndpoint: string,
+    epochAdjustment: number,
     options?: IApostilleOptions,
     ) {
       const hashFunc = HashFunctionCreator.create(hashingType);
@@ -99,6 +103,7 @@ export class ApostilleTransaction {
         networkType,
         generationHashSeed,
         feeMultiplier,
+        epochAdjustment,
         options,
       );
       return apostilleTransaction;
@@ -114,6 +119,7 @@ export class ApostilleTransaction {
    * @param generationHashSeed 
    * @param feeMultiplier 
    * @param apiEndpoint 
+   * @param epochAdjustment 
    */
   public static updateFromData(
     data: DataView,
@@ -124,6 +130,7 @@ export class ApostilleTransaction {
     generationHashSeed: string,
     feeMultiplier: number,
     apiEndpoint: string,
+    epochAdjustment: number,
   ) {
     const hashFunc = HashFunctionCreator.create(hashingType);
     const apostilleMessage = hashFunc.createApostilleTransactionMessage(
@@ -137,6 +144,7 @@ export class ApostilleTransaction {
       networkType,
       generationHashSeed,
       feeMultiplier,
+      epochAdjustment,
     );
     return apostilleTransaction;
   }
@@ -151,6 +159,7 @@ export class ApostilleTransaction {
    * @param generationHashSeed 
    * @param feeMultiplier 
    * @param apiEndpoint 
+   * @param epochAdjustment 
    */
   public static updateFromHashedData(
     hashedData: string,
@@ -161,6 +170,7 @@ export class ApostilleTransaction {
     generationHashSeed: string,
     feeMultiplier: number,
     apiEndpoint: string,
+    epochAdjustment: number,
   ) {
     const hashFunc = HashFunctionCreator.create(hashingType);
     const apostilleMessage = hashFunc.createApostilleTransactionMessageFromHashedData(
@@ -174,6 +184,7 @@ export class ApostilleTransaction {
       networkType,
       generationHashSeed,
       feeMultiplier,
+      epochAdjustment,
     );
     return apostilleTransaction;
   }
@@ -185,6 +196,7 @@ export class ApostilleTransaction {
     private readonly networkType: NetworkType,
     private readonly generationHashSeed: string,
     private readonly feeMultiplier: number,
+    private readonly epochAdjustment: number,
     private readonly options?: IApostilleOptions,
   ) {
     this.createCoreTransaction();
@@ -219,7 +231,7 @@ export class ApostilleTransaction {
 
   private createCoreTransaction() {
     const tx = TransferTransaction.create(
-      Deadline.create(),
+      Deadline.create(this.epochAdjustment),
       this.apostilleAccount.publicAccount.address,
       [],
       PlainMessage.create(this.apostilleMessage),
@@ -237,7 +249,7 @@ export class ApostilleTransaction {
         approvalNum = this.options.assignOwners.length - 1;
       }
       const tx = MultisigAccountModificationTransaction.create(
-        Deadline.create(),
+        Deadline.create(this.epochAdjustment),
         approvalNum,
         approvalNum,
         this.options.assignOwners,
@@ -253,7 +265,7 @@ export class ApostilleTransaction {
       const txs: AccountMetadataTransaction[] = [];
       Object.entries(this.options.metadata).forEach(([k, v]) => {
         const tx = AccountMetadataTransaction.create(
-          Deadline.create(),
+          Deadline.create(this.epochAdjustment),
           this.apostilleAccount.publicAccount.address,
           MetadataKeyHelper.keyToKeyId(k),
           v.length,
@@ -302,7 +314,7 @@ export class ApostilleTransaction {
   private createCompleteTransaction(innerTxs: InnerTransaction[]) {
     const signerCount = this.getSignerCount();
     const tx = AggregateTransaction.createComplete(
-      Deadline.create(),
+      Deadline.create(this.epochAdjustment),
       innerTxs,
       this.networkType,
       []
@@ -313,7 +325,7 @@ export class ApostilleTransaction {
   private createBondedTransaction(innerTxs: InnerTransaction[]) {
     const singerCount = this.getSignerCount();
     const tx = AggregateTransaction.createBonded(
-      Deadline.create(),
+      Deadline.create(this.epochAdjustment),
       innerTxs,
       this.networkType,
       []

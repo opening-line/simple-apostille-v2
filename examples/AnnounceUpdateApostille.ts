@@ -7,7 +7,7 @@ const networkType = NetworkType.TEST_NET;
 
 const data = 'Hello World!!';
 
-const apostilleAccountKey = 'D9CCB105BDD459432EC7E0A36195F764B210A4ED3BBEEB32BA87D9435C239C09';
+const apostilleAccountKey = 'DABCF0362900EE64F17187EAEDF43793EF48F6796846B7595F7F6E7E77A6F001';
 const apostilleAccount = Account.createFromPrivateKey(apostilleAccountKey, networkType);
 
 const ownerKey = '3E04C96EBAE99124A1D388B05EBD007AA06CB917E09CA08F5859B3ADC49A148D';
@@ -19,7 +19,8 @@ const repositoryFactory = new RepositoryFactoryHttp(
   apiEndpoint,
   { generationHash, networkType }
 );
-const feeMultiplier = 100;
+const feeMultiplier = 1000;
+const epochAdjustment = 1573430400;
 
 const apostilleTx = ApostilleTransaction.updateFromData(
   data,
@@ -29,7 +30,8 @@ const apostilleTx = ApostilleTransaction.updateFromData(
   networkType,
   generationHash,
   feeMultiplier,
-  apiEndpoint
+  apiEndpoint,
+  epochAdjustment,
 );
 
 apostilleTx.singedTransactionAndAnnounceType().then((info) => {

@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { NetworkType, Account, RepositoryFactoryHttp, Address, HashLockTransaction, Deadline, NetworkCurrencyPublic, UInt64, TransactionService } from 'symbol-sdk';
+import { NetworkType, Account, RepositoryFactoryHttp, Address, HashLockTransaction, Deadline, UInt64, TransactionService, Currency } from 'symbol-sdk';
 import { IApostilleOptions, ApostilleTransaction } from '../src/model';
 import { HashingType } from '../src/utils/hash';
 
@@ -15,7 +15,9 @@ const owner2 = Address.createFromRawAddress('TBCCZ3HXPZLPQBEY6LZ2A3NE6WL5DHKZOMW
 
 const apiEndpoint = 'https://sym-test.opening-line.jp:3001';
 const generationHash = '6C1B92391CCB41C96478471C2634C111D9E989DECD66130C0430B5B8D20117CD';
-const feeMultiplier = 400;
+const feeMultiplier = 1000;
+const epochAdjustment = 1573430400;
+
 const repositoryFactory = new RepositoryFactoryHttp(
   apiEndpoint,
   { generationHash, networkType }
@@ -40,6 +42,7 @@ const apostilleTransaction = ApostilleTransaction.createFromData(
   generationHash,
   feeMultiplier,
   apiEndpoint,
+  epochAdjustment,
   option
 );
 
@@ -47,8 +50,8 @@ apostilleTransaction.singedTransactionAndAnnounceType().then((info) => {
   const signedTx = info.signedTransaction;
   console.log(signedTx.hash);
   const hashLockTx = HashLockTransaction.create(
-    Deadline.create(),
-    NetworkCurrencyPublic.createRelative(10),
+    Deadline.create(epochAdjustment),
+    Currency.PUBLIC.createRelative(10),
     UInt64.fromUint(480),
     signedTx,
     networkType,
