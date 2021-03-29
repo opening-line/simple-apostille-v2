@@ -109,7 +109,13 @@ export class AuditService {
     const blockRep = this.repositoryFactory.createBlockRepository();
     const blockInfo: BlockInfo = await blockRep.getBlockByHeight(blockHight).toPromise();
     const t = Number(blockInfo.timestamp.toString());
-    return new Date(t + 1573430400000);
+    const epochAdjustment = await this.getEpochAdjustment();
+    return new Date(t + epochAdjustment * 1000);
+  }
+
+  private async getEpochAdjustment() {
+    const epochAdjustment = await this.repositoryFactory.getEpochAdjustment().toPromise();
+    return epochAdjustment;
   }
 
   private parseMessage(txMessage: string) {
