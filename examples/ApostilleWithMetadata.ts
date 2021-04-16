@@ -1,24 +1,33 @@
 /* eslint-disable no-console */
-import { NetworkType, Account, RepositoryFactoryHttp, TransactionService } from 'symbol-sdk';
+import { Account, RepositoryFactoryHttp, TransactionService } from 'symbol-sdk';
 import { IApostilleMetadata, IApostilleOptions, ApostilleTransaction } from '../src/model';
 import { HashingType } from '../src/utils/hash';
 
 const data  = 'Hello World';
 const seed = `hello_${new Date().toLocaleString()}.txt`;
 
-const singerKey = '3E04C96EBAE99124A1D388B05EBD007AA06CB917E09CA08F5859B3ADC49A148D';
-const networkType = NetworkType.TEST_NET;
-const account = Account.createFromPrivateKey(singerKey, networkType);
+const singerKey = '__INPUT_YOUR_PRIVATE_KEY__';
 
 const apiEndpoint = 'https://sym-test.opening-line.jp:3001';
-const generationHash = '6C1B92391CCB41C96478471C2634C111D9E989DECD66130C0430B5B8D20117CD';
-const feeMultiplier = 1000;
-const epochAdjustment = 1573430400;
 
-const repositoryFactory = new RepositoryFactoryHttp(
-  apiEndpoint,
-  { generationHash, networkType }
-);
+let networkType = 0;
+let generationHash = '';
+let feeMultiplier = 0;
+let epochAdjustment = 0;
+
+const repoFactory = new RepositoryFactoryHttp(apiEndpoint);
+
+async function getNetworkProps() {
+  generationHash = await repoFactory.getGenerationHash().toPromise();
+  networkType = await repoFactory.getNetworkType().toPromise();
+  epochAdjustment = await repoFactory.getEpochAdjustment().toPromise();
+}
+
+async function getFeeMultiplier() {
+  const networkRepo = await repoFactory.createNetworkRepository();
+  const feeMultipliers = await networkRepo.getTransactionFees().toPromise();
+  feeMultiplier = feeMultipliers.minFeeMultiplier;
+}
 
 const metadata: IApostilleMetadata = {
   filename: seed,
@@ -30,41 +39,48 @@ const option: IApostilleOptions = {
   metadata,
 }
 
-const apostilleTransaction = ApostilleTransaction.createFromData(
-  data,
-  HashingType.Type.sha256,
-  seed,
-  account,
-  networkType,
-  generationHash,
-  feeMultiplier,
-  apiEndpoint,
-  epochAdjustment,
-  option
-);
-
-apostilleTransaction.singedTransactionAndAnnounceType().then((info) => {
-  const signedTx = info.signedTransaction;
-  console.log(signedTx.hash);
-  const transactionService = new TransactionService(
-    repositoryFactory.createTransactionRepository(),
-    repositoryFactory.createReceiptRepository(),
+async function announceApostilleTx() {
+  const singer = Account.createFromPrivateKey(singerKey, networkType);
+  const apostilleTransaction = ApostilleTransaction.createFromData(
+    data,
+    HashingType.Type.sha256,
+    seed,
+    singer,
+    networkType,
+    generationHash,
+    feeMultiplier,
+    apiEndpoint,
+    epochAdjustment,
+    option
   );
-  const listener = repositoryFactory.createListener();
-  listener.open().then(() => {
-    transactionService.announce(signedTx, listener).subscribe((x) => {
-      console.log('--- Apostille created ---');
-      console.log(`txHash: ${x.transactionInfo!.hash}`);
-      console.log(`apostille owner key: ${apostilleTransaction.apostilleAccount.account!.privateKey}`);
-      listener.close();
-    }, (err) => {
+
+  apostilleTransaction.singedTransactionAndAnnounceType().then((info) => {
+    const signedTx = info.signedTransaction;
+    const transactionService = new TransactionService(
+      repoFactory.createTransactionRepository(),
+      repoFactory.createReceiptRepository(),
+    );
+    const listener = repoFactory.createListener();
+    listener.open().then(() => {
+      transactionService.announce(signedTx, listener).subscribe((x) => {
+        console.log('--- Apostille created ---');
+        console.log(`txHash: ${x.transactionInfo!.hash}`);
+        console.log(`apostille owner key: ${apostilleTransaction.apostilleAccount.account!.privateKey}`);
+        listener.close();
+      }, (err) => {
+        console.error(err);
+        listener.close();
+      });
+    }).catch((err) => {
       console.error(err);
-      listener.close();
     })
-  }).catch((err) => {
-    console.error(err);
-    listener.close();
   })
-}).catch((err) => {
-  console.error(err);
-})
+}
+
+async function main() {
+  await getNetworkProps();
+  await getFeeMultiplier();
+  await announceApostilleTx();
+}
+
+main().then(() => {});

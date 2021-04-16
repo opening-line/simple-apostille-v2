@@ -2,7 +2,7 @@
 import { AuditService } from "../src/service";
 
 const data = 'Hello World!';
-const txHash = 'D5E1DA97843B6144770214F29046EB8E3A6BA5B8327182A07288F92CB7116A42';
+const txHash = '77CB1A251B028529C5AB07394D4DD5E769382C0E47FA4267B8694649ED75D003';
 
 const apiEndpoint = 'https://sym-test.opening-line.jp:3001';
 
