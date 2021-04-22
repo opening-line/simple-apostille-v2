@@ -1,86 +1,98 @@
 /* eslint-disable no-console */
-import { NetworkType, Account, RepositoryFactoryHttp, Address, HashLockTransaction, Deadline, UInt64, TransactionService, Currency } from 'symbol-sdk';
+import { Account, RepositoryFactoryHttp, Address, HashLockTransaction, Deadline, UInt64, TransactionService, Currency } from 'symbol-sdk';
 import { IApostilleOptions, ApostilleTransaction } from '../src/model';
 import { HashingType } from '../src/utils/hash';
 
 const data = 'Hello World!';
 const seed = `hello_${new Date().toLocaleString()}.txt`;
 
-const signerKey = '3E04C96EBAE99124A1D388B05EBD007AA06CB917E09CA08F5859B3ADC49A148D';
-const networkType = NetworkType.TEST_NET;
-const account = Account.createFromPrivateKey(signerKey, networkType);
-
-const owner1 = Address.createFromRawAddress('TAMBYNUGGDWZBFUZBJX4HWQCNJ2IBB5XVJVCMJQ');
-const owner2 = Address.createFromRawAddress('TBCCZ3HXPZLPQBEY6LZ2A3NE6WL5DHKZOMWMZFA');
+const signerKey = '__INPUT_YOUR_PRIVATE_KEY__';
 
 const apiEndpoint = 'https://sym-test.opening-line.jp:3001';
-const generationHash = '6C1B92391CCB41C96478471C2634C111D9E989DECD66130C0430B5B8D20117CD';
-const feeMultiplier = 1000;
-const epochAdjustment = 1573430400;
+let networkType = 0;
+let generationHash = ''
+let epochAdjustment = 0;
+let feeMultiplier = 0;
 
-const repositoryFactory = new RepositoryFactoryHttp(
-  apiEndpoint,
-  { generationHash, networkType }
-);
+const repoFactory = new RepositoryFactoryHttp(apiEndpoint);
 
-const assignOwners = [
-  account.address,
-  owner1,
-  owner2,
-];
+async function getNetworkProps() {
+  generationHash = await repoFactory.getGenerationHash().toPromise();
+  networkType = await repoFactory.getNetworkType().toPromise();
+  epochAdjustment = await repoFactory.getEpochAdjustment().toPromise();
+}
 
-const option: IApostilleOptions = {
-  assignOwners
-};
+async function getFeeMultiplier() {
+  const networkRepo = await repoFactory.createNetworkRepository();
+  const feeMultipliers = await networkRepo.getTransactionFees().toPromise();
+  feeMultiplier = feeMultipliers.minFeeMultiplier;
+}
 
-const apostilleTransaction = ApostilleTransaction.createFromData(
-  data,
-  HashingType.Type.sha256,
-  seed,
-  account,
-  networkType,
-  generationHash,
-  feeMultiplier,
-  apiEndpoint,
-  epochAdjustment,
-  option
-);
+async function announceApostilleTx() {
+  const signer = Account.createFromPrivateKey(signerKey, networkType);
+  const owner1 = Address.createFromRawAddress('__INPUT_ASSIGN_OWNER_ADDRESS1__');
+  const owner2 = Address.createFromRawAddress('__INPUT_ASSIGN_OWNER_ADDRESS2__');
 
-apostilleTransaction.singedTransactionAndAnnounceType().then((info) => {
-  const signedTx = info.signedTransaction;
-  console.log(signedTx.hash);
-  const hashLockTx = HashLockTransaction.create(
-    Deadline.create(epochAdjustment),
-    Currency.PUBLIC.createRelative(10),
-    UInt64.fromUint(480),
-    signedTx,
+  const assignOwners = [
+    signer.address,
+    owner1,
+    owner2,
+  ];
+
+  const option: IApostilleOptions = {
+    assignOwners
+  };
+
+  const apostilleTx = ApostilleTransaction.createFromData(
+    data,
+    HashingType.Type.sha256,
+    seed,
+    signer,
     networkType,
-  ).setMaxFee(feeMultiplier);
-
-  const signedHashLockTx = account.sign(hashLockTx, generationHash);
-  console.log(signedHashLockTx.hash);
-
-  const transactionService = new TransactionService(
-    repositoryFactory.createTransactionRepository(),
-    repositoryFactory.createReceiptRepository(),
+    generationHash,
+    feeMultiplier,
+    apiEndpoint,
+    epochAdjustment,
+    option
   );
-  const listener = repositoryFactory.createListener();
-  listener.open().then(() => {
-    transactionService.announceHashLockAggregateBonded(
-      signedHashLockTx,
+
+  apostilleTx.singedTransactionAndAnnounceType().then((info) => {
+    const signedTx = info.signedTransaction;
+    const hashLockTx = HashLockTransaction.create(
+      Deadline.create(epochAdjustment),
+      Currency.PUBLIC.createRelative(10),
+      UInt64.fromUint(480),
       signedTx,
-      listener
-    ).subscribe((x) => {
-      listener.close();
-      console.log(x);
-    }, (err) => {
-      listener.close();
-      console.error(err);
-    })
-  }).catch((err) => {
-    console.error(err);
-    listener.close();
-  })
-}).catch((err) => {
-  console.error(err);
-})
+      networkType,
+    ).setMaxFee(feeMultiplier);
+
+    const signedHashLockTx = signer.sign(hashLockTx, generationHash);
+
+    const transactionService = new TransactionService(
+      repoFactory.createTransactionRepository(),
+      repoFactory.createReceiptRepository(),
+    );
+    const listener = repoFactory.createListener();
+    listener.open().then(() => {
+      transactionService.announceHashLockAggregateBonded(
+        signedHashLockTx,
+        signedTx,
+        listener
+      ).subscribe((x) => {
+        listener.close();
+        console.log(x);
+      }, (err) => {
+        listener.close();
+        console.error(err);
+      });
+    });
+  });
+}
+
+async function main() {
+  await getNetworkProps();
+  await getFeeMultiplier();
+  await announceApostilleTx();
+}
+
+main().then(() => {});
