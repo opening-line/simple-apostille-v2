@@ -150,6 +150,38 @@ describe('Should create apostille transaction', () => {
       expect(x.value).toEqual(authorName);
     });
   });
+  it('Should create apostille transaction with metadata fullwidth characters', () => {
+    const authorName = '三郎 山田';
+    const metadata: IApostilleMetadata = {
+      author: authorName,
+    };
+    const options: IApostilleOptions = {
+      metadata,
+    };
+    const transaction = ApostilleTransaction.createFromHashedData(
+      hashedData,
+      HashingType.Type.sha256,
+      seed,
+      signerAccount,
+      networkType,
+      generationHashSeed,
+      feeMultiplier,
+      apiEndpoint,
+      epochAdjustment,
+      options
+    );
+
+    expect(transaction.coreTransaction).toBeDefined();
+    expect(transaction.assignOwnerShipTransaction).toBeUndefined();
+    expect(transaction.metaDataTransactions).toBeDefined();
+    expect(transaction.metaDataTransactions!.length).toEqual(Object.keys(metadata).length);
+    transaction.metaDataTransactions!.forEach((x) => {
+      const targetAddress= x.targetAddress as Address;
+      expect(targetAddress.plain()).toEqual(transaction.apostilleAccount.publicAccount.address.plain());
+      expect(x.scopedMetadataKey).toEqual(MetadataKeyHelper.keyToKeyId('author'));
+      expect(x.value).toEqual(authorName);
+    });
+  });
 });
 
 describe('Should create update transaction', () => {
