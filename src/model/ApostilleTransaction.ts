@@ -268,10 +268,12 @@ export class ApostilleTransaction {
           Deadline.create(this.epochAdjustment),
           this.apostilleAccount.publicAccount.address,
           MetadataKeyHelper.keyToKeyId(k),
-          v.length,
+          [...v]
+            .map((x) => (!x.match(/[^\x01-\x7E]/) ? Number(1) : Number(6)))
+            .reduce((p, c) => p + c),
           v,
-          this.networkType,
-        )
+          this.networkType
+        );
         txs.push(tx);
       });
       this.metaDataTransactions = txs;
