@@ -1,4 +1,5 @@
-import { Account, MultisigAccountModificationTransaction, AccountMetadataTransaction, TransferTransaction, Deadline, PlainMessage, NetworkType, InnerTransaction, PublicAccount, AggregateTransaction } from "symbol-sdk";
+import { Account, MultisigAccountModificationTransaction, AccountMetadataTransaction, TransferTransaction, Deadline, PlainMessage, NetworkType, InnerTransaction, PublicAccount, AggregateTransaction , Convert } from "symbol-sdk";
+
 import { HashingType, HashFunctionCreator, DataView } from "../utils/hash";
 import { MetadataKeyHelper } from "../utils/MetadataKeyHelper";
 import { ApostilleAccount } from "./ApostilleAccount";
@@ -268,9 +269,7 @@ export class ApostilleTransaction {
           Deadline.create(this.epochAdjustment),
           this.apostilleAccount.publicAccount.address,
           MetadataKeyHelper.keyToKeyId(k),
-          [...v]
-            .map((x) => (!x.match(/[^\x01-\x7E]/) ? Number(1) : Number(6)))
-            .reduce((p, c) => p + c),
+          Convert.utf8ToUint8(v).length,
           v,
           this.networkType
         );
