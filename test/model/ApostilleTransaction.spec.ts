@@ -1,4 +1,4 @@
-import { Account, NetworkType, Address } from "symbol-sdk";
+import { Account, NetworkType, Address, Convert } from "symbol-sdk";
 import { ApostilleTransaction, IApostilleOptions, IApostilleMetadata } from "../../src/model";
 import { HashingType } from "../../src/utils/hash";
 import { MetadataKeyHelper } from "../../src/utils";
@@ -147,7 +147,7 @@ describe('Should create apostille transaction', () => {
       const targetAddress= x.targetAddress as Address;
       expect(targetAddress.plain()).toEqual(transaction.apostilleAccount.publicAccount.address.plain());
       expect(x.scopedMetadataKey).toEqual(MetadataKeyHelper.keyToKeyId('author'));
-      expect(x.value).toEqual(authorName);
+      expect(Convert.decodeHex(x.value)).toEqual(authorName);
     });
   });
   it('Should create apostille transaction with metadata fullwidth characters', () => {
@@ -179,7 +179,7 @@ describe('Should create apostille transaction', () => {
       const targetAddress= x.targetAddress as Address;
       expect(targetAddress.plain()).toEqual(transaction.apostilleAccount.publicAccount.address.plain());
       expect(x.scopedMetadataKey).toEqual(MetadataKeyHelper.keyToKeyId('author'));
-      expect(x.value).toEqual(authorName);
+      expect(Convert.decodeHex(x.value)).toEqual(authorName);
     });
   });
 });
