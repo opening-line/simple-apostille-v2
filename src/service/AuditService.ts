@@ -1,3 +1,4 @@
+import { lastValueFrom } from "rxjs";
 import { RepositoryFactoryHttp, TransactionGroup, AggregateTransaction, TransferTransaction, UInt64, BlockInfo, Address, MultisigAccountModificationTransaction, TransactionStatusHttp } from "symbol-sdk";
 import { IAuditResult, IPartialTxAuditResult, AuditType, IApostilleTxMessage } from "../model";
 import { HashFunctionCreator, DataView } from "../utils/hash";
@@ -11,7 +12,7 @@ export class AuditService {
     apiEndpoint: string,
   ) {
     const transactionStatusHttp = new TransactionStatusHttp(apiEndpoint);
-    const status = await transactionStatusHttp.getTransactionStatus(txHash).toPromise();
+    const status = await lastValueFrom(transactionStatusHttp.getTransactionStatus(txHash));
     if (status.group === 'confirmed') {
       const result = await this.auditWithComplete(data, txHash, apiEndpoint);
       return result;
@@ -107,14 +108,14 @@ export class AuditService {
 
   private async getTimestamp(blockHight: UInt64) {
     const blockRep = this.repositoryFactory.createBlockRepository();
-    const blockInfo: BlockInfo = await blockRep.getBlockByHeight(blockHight).toPromise();
+    const blockInfo: BlockInfo = await lastValueFrom(blockRep.getBlockByHeight(blockHight));
     const t = Number(blockInfo.timestamp.toString());
     const epochAdjustment = await this.getEpochAdjustment();
     return new Date(t + epochAdjustment * 1000);
   }
 
   private async getEpochAdjustment() {
-    const epochAdjustment = await this.repositoryFactory.getEpochAdjustment().toPromise();
+    const epochAdjustment = await lastValueFrom(this.repositoryFactory.getEpochAdjustment());
     return epochAdjustment;
   }
 
@@ -133,7 +134,7 @@ export class AuditService {
 
   private async getTransaction() {
     const transactionRep = this.repositoryFactory.createTransactionRepository();
-    const tx = await transactionRep.getTransaction(this.txHash, TransactionGroup.Confirmed).toPromise();
+    const tx = await lastValueFrom(transactionRep.getTransaction(this.txHash, TransactionGroup.Confirmed));
     if (tx instanceof AggregateTransaction) {
       const coreInnerTx = tx.innerTransactions.find(t => t instanceof TransferTransaction && t.message.payload.startsWith('fe4e5459'));
       if (coreInnerTx) {
@@ -147,7 +148,7 @@ export class AuditService {
 
   private async getTransactionFromPartial() {
     const transactionRep = this.repositoryFactory.createTransactionRepository();
-    const tx = await transactionRep.getTransaction(this.txHash, TransactionGroup.Partial).toPromise();
+    const tx = await lastValueFrom(transactionRep.getTransaction(this.txHash, TransactionGroup.Partial));
     if (tx instanceof AggregateTransaction) {
       const coreInnerTx = tx.innerTransactions.find(t => t instanceof TransferTransaction && t.message.payload.startsWith('fe4e5459'));
       if (coreInnerTx) {

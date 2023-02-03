@@ -1,5 +1,6 @@
 import { PublicAccount, Account, MultisigHttp, MultisigAccountInfo } from 'symbol-sdk';
 import { createHash } from 'crypto';
+import { lastValueFrom } from 'rxjs';
 
 const fixPrivateKey = (privateKey) => {
   return (`0000000000000000000000000000000000000000000000000000000000000000${privateKey.replace(/^00/, '')}`)
@@ -44,7 +45,7 @@ export class ApostilleAccount {
     if (this.apiEndpoint) {
       try {
         const multisigHttp = new MultisigHttp(this.apiEndpoint);
-        const multisigInfo = await multisigHttp.getMultisigAccountInfo(this.publicAccount.address).toPromise();
+        const multisigInfo = await lastValueFrom(multisigHttp.getMultisigAccountInfo(this.publicAccount.address));
         this.multisigInfo = multisigInfo;
       } catch(err) {
         if (err.message) {

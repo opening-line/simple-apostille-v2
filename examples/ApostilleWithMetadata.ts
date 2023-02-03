@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import { lastValueFrom } from 'rxjs';
 import { Account, RepositoryFactoryHttp, TransactionService } from 'symbol-sdk';
 import { IApostilleMetadata, IApostilleOptions, ApostilleTransaction } from '../src/model';
 import { HashingType } from '../src/utils/hash';
@@ -18,14 +19,14 @@ let epochAdjustment = 0;
 const repoFactory = new RepositoryFactoryHttp(apiEndpoint);
 
 async function getNetworkProps() {
-  generationHash = await repoFactory.getGenerationHash().toPromise();
-  networkType = await repoFactory.getNetworkType().toPromise();
-  epochAdjustment = await repoFactory.getEpochAdjustment().toPromise();
+  generationHash = await lastValueFrom(repoFactory.getGenerationHash());
+  networkType = await lastValueFrom(repoFactory.getNetworkType());
+  epochAdjustment = await lastValueFrom(repoFactory.getEpochAdjustment());
 }
 
 async function getFeeMultiplier() {
   const networkRepo = await repoFactory.createNetworkRepository();
-  const feeMultipliers = await networkRepo.getTransactionFees().toPromise();
+  const feeMultipliers = await lastValueFrom(networkRepo.getTransactionFees());
   feeMultiplier = feeMultipliers.minFeeMultiplier;
 }
 
@@ -62,14 +63,16 @@ async function announceApostilleTx() {
     );
     const listener = repoFactory.createListener();
     listener.open().then(() => {
-      transactionService.announce(signedTx, listener).subscribe((x) => {
-        console.log('--- Apostille created ---');
-        console.log(`txHash: ${x.transactionInfo!.hash}`);
-        console.log(`apostille owner key: ${apostilleTransaction.apostilleAccount.account!.privateKey}`);
-        listener.close();
-      }, (err) => {
-        console.error(err);
-        listener.close();
+      transactionService.announce(signedTx, listener).subscribe({
+        next(x) {
+          console.log('--- Apostille created ---');
+          console.log(`txHash: ${x.transactionInfo!.hash}`);
+          console.log(`apostille owner key: ${apostilleTransaction.apostilleAccount.account!.privateKey}`);
+          listener.close();
+        },
+        error(err) {
+          console.error(err);listener.close();
+        }
       });
     }).catch((err) => {
       console.error(err);
