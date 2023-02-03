@@ -53,11 +53,11 @@ export class AuditService {
 
   private async auditWithConfirmed() {
     const coreTx = await this.getTransaction();
-    const singerPublicAccount = coreTx.signer!;
+    const signerPublicAccount = coreTx.signer!;
     const parsedMessage = this.parseMessage(coreTx.message.payload);
     const hashFunction = HashFunctionCreator.createWithTypeStr(parsedMessage.hashingTypeStr);
     const hashedData = hashFunction.hashing(this.data);
-    const isValid = singerPublicAccount.verifySignature(hashedData, parsedMessage.signedHash);
+    const isValid = signerPublicAccount.verifySignature(hashedData, parsedMessage.signedHash);
     if (isValid) {
       const signer = coreTx.signer!.address;
       const apostilleAccount = coreTx.recipientAddress as Address;

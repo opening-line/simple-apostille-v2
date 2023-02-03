@@ -56,7 +56,7 @@ async function announceApostilleTx() {
     option
   );
 
-  apostilleTx.singedTransactionAndAnnounceType().then((info) => {
+  apostilleTx.signedTransactionAndAnnounceType().then((info) => {
     const signedTx = info.signedTransaction;
     const hashLockTx = HashLockTransaction.create(
       Deadline.create(epochAdjustment),

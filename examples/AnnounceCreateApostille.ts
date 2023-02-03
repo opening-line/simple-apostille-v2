@@ -41,7 +41,7 @@ async function announceApostilleTx() {
     apiEndpoint,
     epochAdjustment
   );
-  const announceInfo = await apostilleTx.singedTransactionAndAnnounceType();
+  const announceInfo = await apostilleTx.signedTransactionAndAnnounceType();
   const transactionRepo = repoFactory.createTransactionRepository();
   const receiptRepo = repoFactory.createReceiptRepository();
   const transactionService = new TransactionService(transactionRepo, receiptRepo);

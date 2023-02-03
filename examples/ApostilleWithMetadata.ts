@@ -6,7 +6,7 @@ import { HashingType } from '../src/utils/hash';
 const data  = 'Hello World';
 const seed = `hello_${new Date().toLocaleString()}.txt`;
 
-const singerKey = '__INPUT_YOUR_PRIVATE_KEY__';
+const signerKey = '__INPUT_YOUR_PRIVATE_KEY__';
 
 const apiEndpoint = 'https://sym-test.opening-line.jp:3001';
 
@@ -40,12 +40,12 @@ const option: IApostilleOptions = {
 }
 
 async function announceApostilleTx() {
-  const singer = Account.createFromPrivateKey(singerKey, networkType);
+  const signer = Account.createFromPrivateKey(signerKey, networkType);
   const apostilleTransaction = ApostilleTransaction.createFromData(
     data,
     HashingType.Type.sha256,
     seed,
-    singer,
+    signer,
     networkType,
     generationHash,
     feeMultiplier,
@@ -54,7 +54,7 @@ async function announceApostilleTx() {
     option
   );
 
-  apostilleTransaction.singedTransactionAndAnnounceType().then((info) => {
+  apostilleTransaction.signedTransactionAndAnnounceType().then((info) => {
     const signedTx = info.signedTransaction;
     const transactionService = new TransactionService(
       repoFactory.createTransactionRepository(),
