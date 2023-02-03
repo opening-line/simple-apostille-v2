@@ -9,7 +9,7 @@ const seed = `hello_${new Date().toLocaleString()}.txt`;
 
 const signerKey = '__INPUT_YOUR_PRIVATE_KEY__';
 
-const apiEndpoint = 'https://sym-test.opening-line.jp:3001';
+const apiEndpoint = 'http://sym-test-01.opening-line.jp:3000';
 
 let networkType = 0;
 let generationHash = '';
