@@ -269,8 +269,8 @@ export class ApostilleTransaction {
           Deadline.create(this.epochAdjustment),
           this.apostilleAccount.publicAccount.address,
           MetadataKeyHelper.keyToKeyId(k),
-          Convert.utf8ToHex(v).length,
-          Convert.utf8ToHex(v),
+          Convert.utf8ToUint8(v).byteLength,
+          Convert.utf8ToUint8(v),
           this.networkType
         );
         txs.push(tx);
