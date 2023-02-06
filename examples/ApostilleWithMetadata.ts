@@ -71,7 +71,8 @@ async function announceApostilleTx() {
           listener.close();
         },
         error(err) {
-          console.error(err);listener.close();
+          console.error(err);
+          listener.close();
         }
       });
     }).catch((err) => {
