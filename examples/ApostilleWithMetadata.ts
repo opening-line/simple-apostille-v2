@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import { lastValueFrom } from 'rxjs';
 import { Account, RepositoryFactoryHttp, TransactionService } from 'symbol-sdk';
 import { IApostilleMetadata, IApostilleOptions, ApostilleTransaction } from '../src/model';
 import { HashingType } from '../src/utils/hash';
@@ -6,9 +7,9 @@ import { HashingType } from '../src/utils/hash';
 const data  = 'Hello World';
 const seed = `hello_${new Date().toLocaleString()}.txt`;
 
-const singerKey = '__INPUT_YOUR_PRIVATE_KEY__';
+const signerKey = '__INPUT_YOUR_PRIVATE_KEY__';
 
-const apiEndpoint = 'https://sym-test.opening-line.jp:3001';
+const apiEndpoint = 'http://sym-test-01.opening-line.jp:3000';
 
 let networkType = 0;
 let generationHash = '';
@@ -18,14 +19,14 @@ let epochAdjustment = 0;
 const repoFactory = new RepositoryFactoryHttp(apiEndpoint);
 
 async function getNetworkProps() {
-  generationHash = await repoFactory.getGenerationHash().toPromise();
-  networkType = await repoFactory.getNetworkType().toPromise();
-  epochAdjustment = await repoFactory.getEpochAdjustment().toPromise();
+  generationHash = await lastValueFrom(repoFactory.getGenerationHash());
+  networkType = await lastValueFrom(repoFactory.getNetworkType());
+  epochAdjustment = await lastValueFrom(repoFactory.getEpochAdjustment());
 }
 
 async function getFeeMultiplier() {
   const networkRepo = await repoFactory.createNetworkRepository();
-  const feeMultipliers = await networkRepo.getTransactionFees().toPromise();
+  const feeMultipliers = await lastValueFrom(networkRepo.getTransactionFees());
   feeMultiplier = feeMultipliers.minFeeMultiplier;
 }
 
@@ -40,12 +41,12 @@ const option: IApostilleOptions = {
 }
 
 async function announceApostilleTx() {
-  const singer = Account.createFromPrivateKey(singerKey, networkType);
+  const signer = Account.createFromPrivateKey(signerKey, networkType);
   const apostilleTransaction = ApostilleTransaction.createFromData(
     data,
     HashingType.Type.sha256,
     seed,
-    singer,
+    signer,
     networkType,
     generationHash,
     feeMultiplier,
@@ -54,7 +55,7 @@ async function announceApostilleTx() {
     option
   );
 
-  apostilleTransaction.singedTransactionAndAnnounceType().then((info) => {
+  apostilleTransaction.signedTransactionAndAnnounceType().then((info) => {
     const signedTx = info.signedTransaction;
     const transactionService = new TransactionService(
       repoFactory.createTransactionRepository(),
@@ -62,14 +63,17 @@ async function announceApostilleTx() {
     );
     const listener = repoFactory.createListener();
     listener.open().then(() => {
-      transactionService.announce(signedTx, listener).subscribe((x) => {
-        console.log('--- Apostille created ---');
-        console.log(`txHash: ${x.transactionInfo!.hash}`);
-        console.log(`apostille owner key: ${apostilleTransaction.apostilleAccount.account!.privateKey}`);
-        listener.close();
-      }, (err) => {
-        console.error(err);
-        listener.close();
+      transactionService.announce(signedTx, listener).subscribe({
+        next(x) {
+          console.log('--- Apostille created ---');
+          console.log(`txHash: ${x.transactionInfo!.hash}`);
+          console.log(`apostille owner key: ${apostilleTransaction.apostilleAccount.account!.privateKey}`);
+          listener.close();
+        },
+        error(err) {
+          console.error(err);
+          listener.close();
+        }
       });
     }).catch((err) => {
       console.error(err);

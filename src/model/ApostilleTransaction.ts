@@ -9,9 +9,9 @@ import { AnnounceInfo } from "./AnnounceInfo";
 
 export enum AnnounceType {
   CompleteWithApostilleAccountSign,
-  CompleteWithoutApostilleAccountSing,
-  BondedWithApostilleAccountSing,
-  BondedWithoutApostilleAccountSing,
+  CompleteWithoutApostilleAccountSign,
+  BondedWithApostilleAccountSign,
+  BondedWithoutApostilleAccountSign,
   CannotAnnounce,
   Unknown,
 }
@@ -30,7 +30,7 @@ export class ApostilleTransaction {
    * @param data 
    * @param hashingType 
    * @param seed 
-   * @param singerAccount 
+   * @param signerAccount 
    * @param networkType 
    * @param generationHashSeed 
    * @param feeMultiplier 
@@ -41,7 +41,7 @@ export class ApostilleTransaction {
     data: DataView,
     hashingType: HashingType.Type,
     seed: string,
-    singerAccount: Account,
+    signerAccount: Account,
     networkType: NetworkType,
     generationHashSeed: string,
     feeMultiplier: number,
@@ -50,12 +50,12 @@ export class ApostilleTransaction {
     options?: IApostilleOptions,
     ) {
       const hashFunc = HashFunctionCreator.create(hashingType);
-      const apostilleMessage = hashFunc.createApostilleTransactionMessage(data, singerAccount);
+      const apostilleMessage = hashFunc.createApostilleTransactionMessage(data, signerAccount);
       const apostilleAccount = ApostilleAccount.create(seed,
-        singerAccount,
+        signerAccount,
         apiEndpoint);
       const apostilleTransaction = new ApostilleTransaction(
-        singerAccount,
+        signerAccount,
         apostilleAccount,
         apostilleMessage,
         networkType,
@@ -208,7 +208,7 @@ export class ApostilleTransaction {
   /**
    * 
    */
-  public async singedTransactionAndAnnounceType() {
+  public async signedTransactionAndAnnounceType() {
     const innerTxs = this.convertInnerTransactions();
     const aggregateTx = await this.createAggregateTransaction(innerTxs);
     const signedTx = this.signTransaction(aggregateTx);
@@ -222,8 +222,8 @@ export class ApostilleTransaction {
 
   private shouldUseHashLockTransaction() {
     switch(this.announceType) {
-      case AnnounceType.BondedWithApostilleAccountSing:
-      case AnnounceType.BondedWithoutApostilleAccountSing:
+      case AnnounceType.BondedWithApostilleAccountSign:
+      case AnnounceType.BondedWithoutApostilleAccountSign:
         return true;
       default:
         return false;
@@ -269,8 +269,8 @@ export class ApostilleTransaction {
           Deadline.create(this.epochAdjustment),
           this.apostilleAccount.publicAccount.address,
           MetadataKeyHelper.keyToKeyId(k),
-          Convert.utf8ToHex(v).length,
-          Convert.utf8ToHex(v),
+          Convert.utf8ToUint8(v).byteLength,
+          Convert.utf8ToUint8(v),
           this.networkType
         );
         txs.push(tx);
@@ -302,10 +302,10 @@ export class ApostilleTransaction {
     await this.setAnnounceType();
     switch(this.announceType) {
       case AnnounceType.CompleteWithApostilleAccountSign:
-      case AnnounceType.CompleteWithoutApostilleAccountSing:
+      case AnnounceType.CompleteWithoutApostilleAccountSign:
         return this.createCompleteTransaction(innerTxs);
-      case AnnounceType.BondedWithApostilleAccountSing:
-      case AnnounceType.BondedWithoutApostilleAccountSing:
+      case AnnounceType.BondedWithApostilleAccountSign:
+      case AnnounceType.BondedWithoutApostilleAccountSign:
         return this.createBondedTransaction(innerTxs);
       default:
         throw Error('Can not create aggregate transaction');
@@ -324,23 +324,23 @@ export class ApostilleTransaction {
   }
 
   private createBondedTransaction(innerTxs: InnerTransaction[]) {
-    const singerCount = this.getSignerCount();
+    const signerCount = this.getSignerCount();
     const tx = AggregateTransaction.createBonded(
       Deadline.create(this.epochAdjustment),
       innerTxs,
       this.networkType,
       []
-    ).setMaxFeeForAggregate(this.feeMultiplier, singerCount);
+    ).setMaxFeeForAggregate(this.feeMultiplier, signerCount);
     return tx;
   }
 
   private signTransaction(aggregateTx: AggregateTransaction) {
     switch(this.announceType) {
       case AnnounceType.CompleteWithApostilleAccountSign:
-      case AnnounceType.BondedWithApostilleAccountSing:
+      case AnnounceType.BondedWithApostilleAccountSign:
         return this.signTransactionWithApostilleAccount(aggregateTx)
-      case AnnounceType.CompleteWithoutApostilleAccountSing:
-      case AnnounceType.BondedWithoutApostilleAccountSing:
+      case AnnounceType.CompleteWithoutApostilleAccountSign:
+      case AnnounceType.BondedWithoutApostilleAccountSign:
         return this.signTransactionWithoutApostilleAccount(aggregateTx);
       default:
         throw Error('Can not sign transaction');
@@ -368,17 +368,17 @@ export class ApostilleTransaction {
   }
 
   private getSignerCount() {
-    if (this.announceType === AnnounceType.CompleteWithoutApostilleAccountSing) {
+    if (this.announceType === AnnounceType.CompleteWithoutApostilleAccountSign) {
       return 1;
     }
     if (this.announceType === AnnounceType.CompleteWithApostilleAccountSign) {
       return 2;
     }
-    if (this.announceType === AnnounceType.BondedWithApostilleAccountSing &&
+    if (this.announceType === AnnounceType.BondedWithApostilleAccountSign &&
       this.options && this.options.assignOwners) {
       return 2 + this.options.assignOwners.length;
     }
-    if (this.announceType === AnnounceType.BondedWithoutApostilleAccountSing) {
+    if (this.announceType === AnnounceType.BondedWithoutApostilleAccountSign) {
       return this.apostilleAccount.multisigInfo!.minApproval;
     }
     throw Error('Can not announce transaction');
@@ -389,12 +389,12 @@ export class ApostilleTransaction {
     if (this.apostilleAccount.multisigInfo) {
       const {multisigInfo} = this.apostilleAccount;
       if (multisigInfo.minApproval >= 2) {
-        this.announceType = AnnounceType.BondedWithoutApostilleAccountSing;
+        this.announceType = AnnounceType.BondedWithoutApostilleAccountSign;
         return;
       }
       if (multisigInfo.minApproval === 1 &&
           multisigInfo.hasCosigner(this.signerAccount.address)) {
-        this.announceType = AnnounceType.CompleteWithoutApostilleAccountSing;
+        this.announceType = AnnounceType.CompleteWithoutApostilleAccountSign;
         return;
       }
       if (multisigInfo.minApproval === 1 &&
@@ -409,13 +409,13 @@ export class ApostilleTransaction {
         this.announceType = AnnounceType.CompleteWithApostilleAccountSign;
         return;
       }
-      this.announceType = AnnounceType.BondedWithApostilleAccountSing;
+      this.announceType = AnnounceType.BondedWithApostilleAccountSign;
       return;
     }
     if (this.metaDataTransactions) {
       this.announceType = AnnounceType.CompleteWithApostilleAccountSign;
       return;
     }
-    this.announceType = AnnounceType.CompleteWithoutApostilleAccountSing;
+    this.announceType = AnnounceType.CompleteWithoutApostilleAccountSign;
   }
 }

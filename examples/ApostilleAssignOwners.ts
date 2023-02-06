@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import { lastValueFrom } from 'rxjs';
 import { Account, RepositoryFactoryHttp, Address, HashLockTransaction, Deadline, UInt64, TransactionService, Currency } from 'symbol-sdk';
 import { IApostilleOptions, ApostilleTransaction } from '../src/model';
 import { HashingType } from '../src/utils/hash';
@@ -8,7 +9,7 @@ const seed = `hello_${new Date().toLocaleString()}.txt`;
 
 const signerKey = '__INPUT_YOUR_PRIVATE_KEY__';
 
-const apiEndpoint = 'https://sym-test.opening-line.jp:3001';
+const apiEndpoint = 'http://sym-test-01.opening-line.jp:3000';
 let networkType = 0;
 let generationHash = ''
 let epochAdjustment = 0;
@@ -17,14 +18,14 @@ let feeMultiplier = 0;
 const repoFactory = new RepositoryFactoryHttp(apiEndpoint);
 
 async function getNetworkProps() {
-  generationHash = await repoFactory.getGenerationHash().toPromise();
-  networkType = await repoFactory.getNetworkType().toPromise();
-  epochAdjustment = await repoFactory.getEpochAdjustment().toPromise();
+  generationHash = await lastValueFrom(repoFactory.getGenerationHash());
+  networkType = await lastValueFrom(repoFactory.getNetworkType());
+  epochAdjustment = await lastValueFrom(repoFactory.getEpochAdjustment());
 }
 
 async function getFeeMultiplier() {
   const networkRepo = await repoFactory.createNetworkRepository();
-  const feeMultipliers = await networkRepo.getTransactionFees().toPromise();
+  const feeMultipliers = await lastValueFrom(networkRepo.getTransactionFees());
   feeMultiplier = feeMultipliers.minFeeMultiplier;
 }
 
@@ -56,7 +57,7 @@ async function announceApostilleTx() {
     option
   );
 
-  apostilleTx.singedTransactionAndAnnounceType().then((info) => {
+  apostilleTx.signedTransactionAndAnnounceType().then((info) => {
     const signedTx = info.signedTransaction;
     const hashLockTx = HashLockTransaction.create(
       Deadline.create(epochAdjustment),
@@ -78,12 +79,15 @@ async function announceApostilleTx() {
         signedHashLockTx,
         signedTx,
         listener
-      ).subscribe((x) => {
-        listener.close();
-        console.log(x);
-      }, (err) => {
-        listener.close();
-        console.error(err);
+      ).subscribe({
+        next(x) {
+          listener.close();
+          console.log(x);
+        },
+        error(err) {
+          listener.close();
+          console.error(err);
+        }
       });
     });
   });
